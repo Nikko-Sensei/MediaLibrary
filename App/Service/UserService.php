@@ -47,7 +47,7 @@ class UserService
         return $user;
     }
 
-    public function register(array $data): ApiResponse
+    public function register(array $data)
     {
         $username = trim($data['username']);
         $email = trim($data['email']);
@@ -77,14 +77,7 @@ class UserService
                 'Email is already registered.';
         }
 
-        if (!empty($errors)) {
 
-            return new ApiResponse(
-                false,
-                'Validation failed.',
-                $errors
-            );
-        }
 
         /**
          * CREATE USER
@@ -107,12 +100,7 @@ class UserService
          */
 
         $user = $this->repo->read($userId);
-
-        return new ApiResponse(
-            true,
-            'User registered successfully.',
-            $user ? User::toArray($user) : null
-        );
+        return $this->userListToArray($user);
     }
 
     public function getByUsernameOrEmail(
@@ -131,11 +119,12 @@ class UserService
         return $user;
     }
 
-    public function allUsersArray(): array
+
+    private function userListToArray(array $user): array
     {
         return array_map(
-            fn(User $user) => User::toArray($user),
-            $this->repo->getAll()
+            fn($item) => $item instanceof User ? $item->toArray() : $item,
+            $user
         );
     }
 }
