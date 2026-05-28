@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Model;
+
+class Catalog
+{
+    private array $data;
+
+    public function __construct(
+        private mixed $media_id,
+        private ?string $title = null,
+        private ?string $description = null,
+        array $data = []
+    ) {
+        $this->data = $data;
+    }
+
+    public function getId()
+    {
+        return $this->media_id;
+    }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function toArray(): array
+    {
+        return array_merge($this->data, [
+            'media_id' => $this->media_id,
+            'title' => $this->title,
+            'description' => $this->description
+        ]);
+    }
+}

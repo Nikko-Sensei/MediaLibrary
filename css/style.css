@@ -1,0 +1,423 @@
+/* =========================
+   RESET & BASE
+   ========================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+html,
+body {
+  height: auto;
+  min-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 0;
+}
+
+body {
+  color: #555;
+  background: #fff;
+}
+
+a {
+  text-decoration: none;
+  border: none;
+}
+
+a img {
+  border: none;
+  outline: none;
+}
+
+/* =========================
+   LAYOUT
+   ========================= */
+
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.content {
+  flex: 1;
+}
+
+.wrapper {
+  height: auto;
+  width: 1000px;
+  margin: 0 auto;
+}
+
+.wrapper:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.section {
+  padding: 40px 0;
+}
+
+.section.page {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  min-height: 60vh;
+}
+
+/* =========================
+   HEADER
+   ========================= */
+
+.header {
+  background: #ef7d7d;
+  padding: 20px 0;
+}
+
+.header .wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  height: 50px;
+  width: auto;
+}
+
+/* =========================
+   NAVIGATION
+   ========================= */
+
+.nav {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  gap: 20px;
+}
+
+.nav li {
+  color: #fff;
+  text-decoration: none;
+  margin-left: 30px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav img {
+  height: 36px;
+  width: auto;
+  margin-right: 8px;
+}
+
+.nav a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav a:hover {
+  text-decoration: underline;
+}
+
+.nav li.on a {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+/* =========================
+   CONTENT / CATALOG
+   ========================= */
+
+.title {
+  text-align: center;
+  margin: 50px 0 30px;
+  font-size: 22px;
+}
+
+.catalog {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  padding: 0;
+}
+
+.catalog li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.catalog img {
+  max-width: 220px;
+  height: 280px;
+  object-fit: contain;
+}
+
+.catalog a {
+  margin-top: 10px;
+  color: #ef7d7d;
+  font-weight: bold;
+}
+
+/* =========================
+   MEDIA DETAILS
+   ========================= */
+
+.media-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.media-picture {
+  float: left;
+  width: 40%;
+}
+
+.media-picture img {
+  max-width: 200px;
+  width: 100%;
+  display: block;
+}
+
+.media-details {
+  flex: 1;
+}
+
+.media-details {
+  float: left;
+  width: 57%;
+  margin-left: 3%;
+}
+
+.media-details table {
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+.media-details th,
+.media-details td {
+  padding: 8px 10px;
+  vertical-align: top;
+  text-align: left;
+}
+
+.media-details th {
+  width: 120px;
+  color: #888;
+  font-weight: bold;
+}
+
+/* =========================
+   BREADCRUMBS
+   ========================= */
+
+.breadcrumbs {
+  font-size: 14px;
+  margin: 25px auto 40px;
+  color: #999;
+  width: 1000px;
+}
+
+.breadcrumbs a {
+  color: #ef7d7d;
+  text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbs span,
+.breadcrumbs a:last-child {
+  color: #555;
+  font-weight: bold;
+}
+
+/* =========================
+   FORMS
+   ========================= */
+
+.suggest-form {
+  max-width: 500px;
+  margin: 30px auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+  color: #555;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-group textarea {
+  height: 120px;
+  resize: vertical;
+}
+
+.btn {
+  background: #ef7d7d;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.btn:hover {
+  background: #e06767;
+}
+
+.section.page h1,
+.section.page p {
+  text-align: center;
+}
+
+.message {
+  max-width: 500px;
+  margin: 0 auto 15px;
+  background: #fdecea;
+  color: #b00020;
+  border: 1px solid #f5c2c7;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+/* =========================
+   PAGINATION
+   ========================= */
+
+.pagination {
+  margin: 40px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.pagination a,
+.pagination span {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 5px 9px;
+  border-radius: 3px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.pagination a {
+  background: #f2f2f2;
+  color: #555;
+}
+
+.pagination a:hover {
+  background: #e85c5c;
+  color: #fff;
+}
+
+.pagination span {
+  background: #e85c5c;
+  color: #fff;
+  cursor: default;
+}
+
+/* =========================
+   FOOTER
+   ========================= */
+
+.footer {
+  background: #f0eeed;
+  border-top: 3px solid #dddddd;
+  padding: 12px 0;
+  font-size: 12px;
+  color: #a5a5a5;
+}
+
+.footer p {
+  margin: 0;
+  padding-right: 3px;
+  text-align: center;
+}
+.footer a {
+  text-decoration: none;
+  color: #539def;
+  margin: 0 10px;
+}
+.footer a:hover,
+.footer a:active {
+  text-decoration: underline;
+}
+
+/* =========================
+   SEARCH BAR (BELOW HEADER)
+   ========================= */
+
+.search {
+  background: #f5f5f5; /* NOT pink */
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.search .wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.search form {
+  display: flex;
+  align-items: center;
+}
+
+.search label {
+  color: #555;
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+.search input[type="text"] {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.search input[type="submit"] {
+  margin-left: 6px;
+  padding: 6px 10px;
+  border: none;
+  background: #ef7d7d;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 3px;
+  cursor: pointer;
+}
