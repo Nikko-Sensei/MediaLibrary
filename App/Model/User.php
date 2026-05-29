@@ -41,22 +41,12 @@ class User
         return $this->password;
     }
 
-    public static function fromArray(array $data): self
-    {
-        return new self(
-            $data['username'],
-            $data['email'],
-            $data['password'],
-            isset($data['user_id']) ? (int) $data['user_id'] : null
-        );
-    }
-
-    public static function toArray(self $user): array
+    public function toArray(): array
     {
         return [
-            'user_id' => $user->id,
-            'username' => $user->username,
-            'email' => $user->email
+            'user_id' => $this->id,
+            'username' => $this->username,
+            'email' => $this->email
         ];
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Exception;
 
-use RuntimeException;
 use Exception;
 
 class NotFoundException extends Exception

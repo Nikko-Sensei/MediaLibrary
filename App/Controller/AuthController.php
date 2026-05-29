@@ -2,24 +2,20 @@
 
 namespace App\Controller;
 
-use App\DTO\RegisterDTO;
 use App\Exception\ValidationException;
-use App\Service\UserService;
 use App\Request\LoginRequest;
 use App\Request\RegisterUserRequest;
+use App\Service\UserService;
 use App\Validate\Validator;
 
 class AuthController
 {
     private UserService $userService;
-    // private Validator $validator;
-    // private LoginRequest $loginRequest;
 
     public function __construct(UserService $userService)
     {
         $this->userService = $userService;
     }
-
 
     public function login(LoginRequest $loginRequest, Validator $validator): void
     {
@@ -33,22 +29,8 @@ class AuthController
         $successMessage = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
             $usernameOrEmail = trim($_POST['username_or_email'] ?? '');
             $password = $_POST['password'] ?? '';
-
-            // validate
-            // $request = new LoginRequest();
-            // $validator = new Validator();
-
-            $isValid = $validator->validate($_POST, $loginRequest->rules());
-
-            if (!$isValid) {
-                $errors = $validator->errors();
-
-                require BASE_PATH . '/view/login.php';
-                return; // 🔥 IMPORTANT FIX
-            }
 
             $user = $this->userService->authenticate($usernameOrEmail, $password);
 
@@ -59,7 +41,6 @@ class AuthController
                 return;
             }
 
-            // success
             $_SESSION['user'] = $user->toArray();
             $_SESSION['success_message'] = 'Login successful!';
 
@@ -85,7 +66,6 @@ class AuthController
         $errors = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
             $username = trim($_POST['username'] ?? '');
             $email = trim($_POST['email'] ?? '');
 
@@ -95,24 +75,22 @@ class AuthController
             );
 
             if (!$isValid) {
-
                 $errors = $validator->errors();
             } else {
-
                 try {
-                    $response = $this->userService->register(
-                        RegisterDTO::fromArray($_POST)
-                    );
+                    $response = $this->userService->register([
+                        'username' => $username,
+                        'email' => $email,
+                        'password' => $_POST['password'] ?? '',
+                        'confirm_password' => $_POST['confirm_password'] ?? ''
+                    ]);
 
                     if ($response->success) {
-
-                        $successMessage =
-                            $response->message;
+                        $successMessage = $response->message;
 
                         $username = '';
                         $email = '';
                     } else {
-
                         $errors = $response->data ?? [];
                     }
                 } catch (ValidationException $exception) {

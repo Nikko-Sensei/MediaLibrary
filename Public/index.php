@@ -1,7 +1,6 @@
 <?php
 
 use App\Core\GlobalExceptionHandler;
-use App\Core\Router;
 use App\DB\Database;
 use App\Repository\CatalogRepository;
 use App\Repository\FormatRepository;
@@ -61,10 +60,15 @@ $userService = new UserService($userRepo);
 
 /*
  * Request flow:
- * index.php -> Core\Router -> controller -> service -> repository -> PDO/database
+ * index.php -> routes/web.php or routes/api.php -> controller -> service -> repository -> PDO/database
  *
  * Exception flow:
  * any layer throws -> GlobalExceptionHandler -> logs/error.log -> friendly response
  */
-$router = new Router($catalogService, $formatService, $userService);
-$router->dispatch($_GET['page'] ?? 'home');
+$page = $_GET['page'] ?? 'home';
+
+if (strpos($page, 'api/') === 0) {
+    require_once BASE_PATH . '/routes/api.php';
+} else {
+    require_once BASE_PATH . '/routes/web.php';
+}

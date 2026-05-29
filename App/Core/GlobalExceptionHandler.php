@@ -2,7 +2,6 @@
 
 namespace App\Core;
 
-use App\DTO\ApiResponse;
 use App\Exception\NotFoundException;
 use App\Exception\ValidationException;
 use ErrorException;
@@ -44,7 +43,7 @@ class GlobalExceptionHandler
             exit;
         }
 
-        self::renderHtmlResponse($statusCode);
+        self::renderHtmlResponse($exception, $statusCode);
         exit;
     }
 
@@ -86,16 +85,26 @@ class GlobalExceptionHandler
             ? $exception->errors()
             : null;
 
-        echo (new ApiResponse(false, $message, $data))->toJson();
+        echo json_encode([
+            'success' => false,
+            'message' => $message,
+            'data' => $data
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
-    private static function renderHtmlResponse(int $statusCode): void
+    private static function renderHtmlResponse(
+        Throwable $exception,
+        int $statusCode
+    ): void
     {
         if (!headers_sent()) {
             http_response_code($statusCode);
         }
 
         $pageTitle = $statusCode === 404 ? 'Page not found' : 'Something went wrong';
+        $errorMessage = $exception instanceof NotFoundException
+            ? $exception->getMessage()
+            : 'Sorry, we could not complete your request right now. Please try again later.';
         $section = '';
         $hideSearch = true;
 
