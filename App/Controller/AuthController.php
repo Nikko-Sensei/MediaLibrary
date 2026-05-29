@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\DTO\RegisterDTO;
+use App\Exception\ValidationException;
 use App\Service\UserService;
 use App\Request\LoginRequest;
 use App\Request\RegisterUserRequest;
@@ -97,28 +99,24 @@ class AuthController
                 $errors = $validator->errors();
             } else {
 
-                $response = $this->userService->register([
+                try {
+                    $response = $this->userService->register(
+                        RegisterDTO::fromArray($_POST)
+                    );
 
-                    'username' => $username,
+                    if ($response->success) {
 
-                    'email' => $email,
+                        $successMessage =
+                            $response->message;
 
-                    'password' => $_POST['password'] ?? '',
+                        $username = '';
+                        $email = '';
+                    } else {
 
-                    'confirm_password' =>
-                    $_POST['confirm_password'] ?? ''
-                ]);
-
-                if ($response->success) {
-
-                    $successMessage =
-                        $response->message;
-
-                    $username = '';
-                    $email = '';
-                } else {
-
-                    $errors = $response->data ?? [];
+                        $errors = $response->data ?? [];
+                    }
+                } catch (ValidationException $exception) {
+                    $errors = $exception->errors();
                 }
             }
         }

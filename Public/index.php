@@ -1,12 +1,7 @@
 <?php
 
-use App\Controller\api\CatalogApiController;
-use App\Controller\api\DetailsApiController;
-use App\Controller\api\SuggestApiController;
-use App\Controller\AuthController;
-use App\Controller\CatalogController;
-use App\Controller\DetailsController;
-use App\Controller\SuggestController;
+use App\Core\GlobalExceptionHandler;
+use App\Core\Router;
 use App\DB\Database;
 use App\Repository\CatalogRepository;
 use App\Repository\FormatRepository;
@@ -32,7 +27,13 @@ use App\Service\UserService;
  */
 define('BASE_PATH', dirname(__DIR__));
 
+if (!defined('BASE_URL')) {
+    define('BASE_URL', '/MediaLibrary-MVC--master');
+}
+
 require_once BASE_PATH . '/vendor/autoload.php';
+
+GlobalExceptionHandler::register();
 
 use Dotenv\Dotenv;
 
@@ -58,9 +59,12 @@ $userRepo = new UserRepository($db);
 $userService = new UserService($userRepo);
 
 
-$page = $_GET['page'] ?? 'home';
-if (strpos($page, 'api/') === 0) {
-    require_once BASE_PATH . '/routes/api.php';
-} else {
-    require_once BASE_PATH . '/routes/web.php';
-}
+/*
+ * Request flow:
+ * index.php -> Core\Router -> controller -> service -> repository -> PDO/database
+ *
+ * Exception flow:
+ * any layer throws -> GlobalExceptionHandler -> logs/error.log -> friendly response
+ */
+$router = new Router($catalogService, $formatService, $userService);
+$router->dispatch($_GET['page'] ?? 'home');

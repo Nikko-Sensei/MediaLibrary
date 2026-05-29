@@ -2,7 +2,9 @@
 
 namespace App\DB;
 
+use App\Exception\DatabaseException;
 use PDO;
+use PDOException;
 
 // System Path(for php)
 if (!defined('BASE_PATH')) {
@@ -25,15 +27,23 @@ class Database
     public static function getConnection(): PDO
     {
         if (self::$connection === null) {
-            self::$connection = new PDO(
-                'mysql:host=' . self::$host . ';dbname=' . self::$dbname . ';charset=utf8',
-                self::$user,
-                self::$pass,
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-                ]
-            );
+            try {
+                self::$connection = new PDO(
+                    'mysql:host=' . self::$host . ';dbname=' . self::$dbname . ';charset=utf8',
+                    self::$user,
+                    self::$pass,
+                    [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+                    ]
+                );
+            } catch (PDOException $exception) {
+                throw new DatabaseException(
+                    'Database connection failed.',
+                    0,
+                    $exception
+                );
+            }
         }
 
         return self::$connection;

@@ -4,9 +4,12 @@ namespace App\Service;
 
 use App\Contract\UserInterface;
 use App\Model\User;
+use App\DTO\ApiResponse;
+use App\DTO\RegisterDTO;
 use App\DTO\UserDTO;
 use App\DTO\UserMapper;
-use App\DTO\ResponseDTO;
+use App\Exception\NotFoundException;
+use App\Exception\ValidationException;
 
 
 class UserService
@@ -25,7 +28,7 @@ class UserService
         $user = $this->findUserByUsernameOrEmail($usernameOrEmail);
 
         if ($user === null) {
-            return null;
+            return throw new NotFoundException('Uer not founds', []);
         }
 
         /**
@@ -42,22 +45,16 @@ class UserService
         return UserMapper::toDTO($user);
     }
 
-    public function register(array $data): ResponseDTO
+    public function register(RegisterDTO|array $data): ApiResponse
     {
-        $username = trim($data['username']);
-        $email = trim($data['email']);
-        $password = $data['password'];
+        $registerDTO = is_array($data)
+            ? RegisterDTO::fromArray($data)
+            : $data;
 
-        $validationResponse = $this->validateUniqueUser(
-            $username,
-            $email
+        $this->validateUniqueUser(
+            $registerDTO->username,
+            $registerDTO->email
         );
-
-        if (!$validationResponse->success) {
-            return $validationResponse;
-        }
-
-
 
         /**
          * CREATE USER
@@ -65,12 +62,12 @@ class UserService
 
         $userId = $this->repo->create([
 
-            'username' => $username,
+            'username' => $registerDTO->username,
 
-            'email' => $email,
+            'email' => $registerDTO->email,
 
             'password' => password_hash(
-                $password,
+                $registerDTO->password,
                 PASSWORD_DEFAULT
             )
         ]);
@@ -82,14 +79,14 @@ class UserService
         $user = $this->repo->read((int) $userId);
 
         if (!$user instanceof User) {
-            return new ResponseDTO(
+            return new ApiResponse(
                 false,
                 'Registration failed.',
                 ['user' => 'Unable to load the created user.']
             );
         }
 
-        return new ResponseDTO(
+        return new ApiResponse(
             true,
             'Registration successful.',
             UserMapper::toDTO($user)
@@ -109,7 +106,7 @@ class UserService
     private function validateUniqueUser(
         string $username,
         string $email
-    ): ResponseDTO {
+    ): void {
         $errors = [];
 
         if ($this->repo->findByUsername($username) !== null) {
@@ -120,18 +117,9 @@ class UserService
             $errors['email'] = 'Email is already registered.';
         }
 
-        if (!empty($errors)) {
-            return new ResponseDTO(
-                false,
-                'Validation failed.',
-                $errors
-            );
+        if (empty($errors)) {
+            throw new ValidationException('Validation failed.', $errors);
         }
-
-        return new ResponseDTO(
-            true,
-            'User is valid.'
-        );
     }
 
     private function findUserByUsernameOrEmail(
