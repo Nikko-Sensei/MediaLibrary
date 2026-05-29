@@ -4,7 +4,10 @@ namespace App\Service;
 
 use App\Contract\UserInterface;
 use App\Model\User;
-use App\DTO\ApiResponse;
+use App\DTO\UserDTO;
+use App\DTO\UserMapper;
+use App\DTO\ResponseDTO;
+
 
 class UserService
 {
@@ -18,16 +21,8 @@ class UserService
     public function authenticate(
         string $usernameOrEmail,
         string $password
-    ): ?User {
-
-        $user = $this->repo
-            ->findByUsername($usernameOrEmail);
-
-        if ($user === null) {
-
-            $user = $this->repo
-                ->findByEmail($usernameOrEmail);
-        }
+    ): ?UserDTO {
+        $user = $this->findUserByUsernameOrEmail($usernameOrEmail);
 
         if ($user === null) {
             return null;
@@ -44,37 +39,22 @@ class UserService
             return null;
         }
 
-        return $user;
+        return UserMapper::toDTO($user);
     }
 
-    public function register(array $data)
+    public function register(array $data): ResponseDTO
     {
         $username = trim($data['username']);
         $email = trim($data['email']);
         $password = $data['password'];
 
-        $errors = [];
+        $validationResponse = $this->validateUniqueUser(
+            $username,
+            $email
+        );
 
-        /**
-         * BUSINESS VALIDATION
-         */
-
-        $existingUsername =
-            $this->repo->findByUsername($username);
-
-        if ($existingUsername !== null) {
-
-            $errors['username'] =
-                'Username is already taken.';
-        }
-
-        $existingEmail =
-            $this->repo->findByEmail($email);
-
-        if ($existingEmail !== null) {
-
-            $errors['email'] =
-                'Email is already registered.';
+        if (!$validationResponse->success) {
+            return $validationResponse;
         }
 
 
@@ -99,11 +79,62 @@ class UserService
          * FETCH CREATED USER
          */
 
-        $user = $this->repo->read($userId);
-        return $this->userListToArray($user);
+        $user = $this->repo->read((int) $userId);
+
+        if (!$user instanceof User) {
+            return new ResponseDTO(
+                false,
+                'Registration failed.',
+                ['user' => 'Unable to load the created user.']
+            );
+        }
+
+        return new ResponseDTO(
+            true,
+            'Registration successful.',
+            UserMapper::toDTO($user)
+        );
     }
 
     public function getByUsernameOrEmail(
+        string $usernameOrEmail
+    ): ?UserDTO {
+        $user = $this->findUserByUsernameOrEmail($usernameOrEmail);
+
+        return $user instanceof User
+            ? UserMapper::toDTO($user)
+            : null;
+    }
+
+    private function validateUniqueUser(
+        string $username,
+        string $email
+    ): ResponseDTO {
+        $errors = [];
+
+        if ($this->repo->findByUsername($username) !== null) {
+            $errors['username'] = 'Username is already taken.';
+        }
+
+        if ($this->repo->findByEmail($email) !== null) {
+            $errors['email'] = 'Email is already registered.';
+        }
+
+        if (!empty($errors)) {
+            return new ResponseDTO(
+                false,
+                'Validation failed.',
+                $errors
+            );
+        }
+
+        return new ResponseDTO(
+            true,
+            'User is valid.'
+        );
+    }
+
+    private function findUserByUsernameOrEmail(
         string $usernameOrEmail
     ): ?User {
 
@@ -116,15 +147,6 @@ class UserService
                 ->findByEmail($usernameOrEmail);
         }
 
-        return $user;
-    }
-
-
-    private function userListToArray(array $user): array
-    {
-        return array_map(
-            fn($item) => $item instanceof User ? $item->toArray() : $item,
-            $user
-        );
+        return $user instanceof User ? $user : null;
     }
 }

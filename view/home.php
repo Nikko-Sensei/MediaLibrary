@@ -1,4 +1,6 @@
-<?php use View\ItemView;
+<?php
+
+use View\ItemView;
 
 $random = $random ?? [];
 require BASE_PATH . '/view/layout/header.php'; ?>

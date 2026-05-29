@@ -235,29 +235,23 @@ class CatalogService
             $criteria['title'] = '%' . $search . '%';
         }
 
-        return $this->catalogListToArray(
-            $this->repo->getAll($criteria, $limit, $offset)
-        );
+        return $this->repo->getAll($criteria, $limit, $offset);
     }
 
     public function categoryCatalogArray($section, $limit, $offset)
     {
-        return $this->catalogListToArray(
-            $this->repo->getAll(
-                [
-                    'category' => $section
-                ],
-                $limit,
-                $offset
-            )
+        return $this->repo->getAll(
+            [
+                'category' => $section
+            ],
+            $limit,
+            $offset
         );
     }
 
     public function fullCatalogArray($limit, $offset)
     {
-        return $this->catalogListToArray(
-            $this->repo->getAll([], $limit, $offset)
-        );
+        return $this->repo->getAll([], $limit, $offset);
     }
 
     public function randomCatalogArray()
@@ -272,11 +266,4 @@ class CatalogService
         return $item instanceof Catalog ? $item->toArray() : $item;
     }
 
-    private function catalogListToArray(array $catalog): array
-    {
-        return array_map(
-            fn($item) => $item instanceof Catalog ? $item->toArray() : $item,
-            $catalog
-        );
-    }
 }

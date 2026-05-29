@@ -1,13 +1,14 @@
 <?php
 namespace View;
-
+use App\Model\Catalog;
 class ItemView
 {
-    public static function render(array $item): string
+
+    public static function render(Catalog $item): string
     {
-        $id = htmlspecialchars($item['media_id'], ENT_QUOTES, 'UTF-8');  // or 'id' if DB says so
-        $img = htmlspecialchars($item['img'], ENT_QUOTES, 'UTF-8');
-        $title = htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8');
+        $id = htmlspecialchars($item->getId(), ENT_QUOTES, 'UTF-8');  // or 'id' if DB says so
+        $img = htmlspecialchars($item->getImage(), ENT_QUOTES, 'UTF-8');
+        $title = htmlspecialchars($item->getTitle(), ENT_QUOTES, 'UTF-8');
 
         return "
         <li>

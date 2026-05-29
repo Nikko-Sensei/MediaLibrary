@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-class ApiResponse
+class ResponseDTO
 {
     public function __construct(
         public bool $success,

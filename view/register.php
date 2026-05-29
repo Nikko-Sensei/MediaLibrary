@@ -8,6 +8,12 @@
 
         <h2>Register</h2>
 
+        <?php if (!empty($successMessage)): ?>
+            <p class="message success">
+                <?= htmlspecialchars($successMessage) ?>
+            </p>
+        <?php endif; ?>
+
         <form method="post" action="<?= BASE_URL ?>/Public/index.php?page=register">
 
             <!-- Username -->

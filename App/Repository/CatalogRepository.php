@@ -4,33 +4,50 @@ namespace App\Repository;
 
 use App\Contract\CatalogInterface;
 use App\Model\Catalog;
-
 use PDO;
 
-/**
- * Handles catalog database operations using PDO
- * and communicates with stored procedures.
- */
 class CatalogRepository extends BaseRepository implements CatalogInterface
 {
     public function __construct(PDO $db)
     {
-        parent::__construct($db, 'view_catalog', 'media_id');
+        parent::__construct(
+            $db,
+            'view_catalog',
+            'media_id'
+        );
     }
 
-
-    public function getRandomCatalog()
+    protected function mapToModel(array $row): Catalog
     {
-        $result = $this->db->query('SELECT * FROM view_random');
-
-        return $result->fetchAll(PDO::FETCH_ASSOC);
+        return new Catalog(
+            $row['media_id'],
+            $row['title'] ?? null,
+            $row['description'] ?? null,
+            $row['img'] ?? null,
+            $row
+        );
     }
 
-    public function read(int $id)
+    public function getRandomCatalog(): array
+    {
+        $result = $this->db->query(
+            'SELECT * FROM view_random'
+        );
+
+        $rows = $result->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(
+            fn(array $row) => $this->mapToModel($row),
+            $rows
+        );
+    }
+
+    public function read(int $id): ?Catalog
     {
         $statement = $this->db->prepare(
             'SELECT * FROM view_item_detail WHERE media_id = ?'
         );
+
         $statement->execute([$id]);
 
         $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
@@ -42,24 +59,20 @@ class CatalogRepository extends BaseRepository implements CatalogInterface
         $item = $rows[0];
 
         foreach ($rows as $row) {
-            if (empty($row['role']) || empty($row['fullname'])) {
+
+            if (
+                empty($row['role']) ||
+                empty($row['fullname'])
+            ) {
                 continue;
             }
 
             $role = strtolower($row['role']);
-            $item[$role][] = $row['fullname'];
+
+            $item[$role][] =
+                $row['fullname'];
         }
 
-        return $item;
-    }
-
-    protected function mapToModel(array $row): object
-    {
-        return new Catalog(
-            $row['media_id'],
-            $row['title'] ?? null,
-            $row['description'] ?? null,
-            $row
-        );
+        return $this->mapToModel($item);
     }
 }

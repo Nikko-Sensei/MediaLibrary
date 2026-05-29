@@ -2,6 +2,7 @@
 
 namespace App\Controller\api;
 
+use App\Model\Catalog;
 use App\Service\CatalogService;
 
 class CatalogApiController
@@ -43,6 +44,14 @@ class CatalogApiController
         }
 
         $catalog = $data['catalog'] ?? [];
+        if (is_array($catalog)) {
+            $data['catalog'] = array_map(
+                fn($item) => $item instanceof Catalog ? $item->toArray() : $item,
+                $catalog
+            );
+            $catalog = $data['catalog'];
+        }
+
         $response = [
             'success' => true,
             'count' => is_array($catalog) ? count($catalog) : 0,

@@ -10,6 +10,7 @@ class Catalog
         private mixed $media_id,
         private ?string $title = null,
         private ?string $description = null,
+        private ?string $image = null,
         array $data = []
     ) {
         $this->data = $data;
@@ -18,6 +19,11 @@ class Catalog
     public function getId()
     {
         return $this->media_id;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
     }
 
     public function getTitle(): ?string
@@ -35,6 +41,7 @@ class Catalog
         return array_merge($this->data, [
             'media_id' => $this->media_id,
             'title' => $this->title,
+            'image' => $this->image,
             'description' => $this->description
         ]);
     }

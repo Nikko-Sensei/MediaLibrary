@@ -17,6 +17,8 @@ class AuthController
     {
         $this->userService = $userService;
     }
+
+
     public function login(LoginRequest $loginRequest, Validator $validator): void
     {
         $pageTitle = 'Login';
@@ -56,7 +58,7 @@ class AuthController
             }
 
             // success
-            $_SESSION['user'] = \App\Model\User::toArray($user);
+            $_SESSION['user'] = $user->toArray();
             $_SESSION['success_message'] = 'Login successful!';
 
             header(
