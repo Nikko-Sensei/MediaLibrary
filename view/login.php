@@ -5,12 +5,15 @@
 
 <div class="section page">
     <div class="auth-card">
+
         <h2>Login</h2>
         <?php if (!empty($errors['error_message'] ?? null)): ?>
         <div class="field-error">
             <?= ($errors['error_message'] ?? ''); ?>
         </div>
         <?php endif; ?>
+
+
         <form method="post" action="<?= BASE_URL ?>/Public/index.php?page=login" autocomplete="off">
 
             <label for="username_or_email">Username or Email</label>

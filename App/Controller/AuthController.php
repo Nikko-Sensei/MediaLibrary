@@ -7,8 +7,11 @@ use App\Request\LoginRequest;
 use App\Request\RegisterUserRequest;
 use App\Service\UserService;
 use App\Validate\Validator;
+use App\Controller\BaseController;
+use App\Exception\NotFoundException;
+use App\Exception\DatabaseException;
 
-class AuthController
+class AuthController extends BaseController
 {
     private UserService $userService;
 
@@ -17,8 +20,11 @@ class AuthController
         $this->userService = $userService;
     }
 
-    public function login(LoginRequest $loginRequest, Validator $validator): void
-    {
+    public function login(
+        LoginRequest $loginRequest,
+        Validator $validator
+    ): void {
+
         $pageTitle = 'Login';
         $section = 'login';
         $hideSearch = true;
@@ -29,33 +35,61 @@ class AuthController
         $successMessage = null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $usernameOrEmail = trim($_POST['username_or_email'] ?? '');
-            $password = $_POST['password'] ?? '';
 
-            $user = $this->userService->authenticate($usernameOrEmail, $password);
-
-            if ($user === null) {
-                $errors['error_message'] = 'Invalid login credentials.';
-
-                require BASE_PATH . '/view/login.php';
-                return;
-            }
-
-            $_SESSION['user'] = $user->toArray();
-            $_SESSION['success_message'] = 'Login successful!';
-
-            header(
-                'Location: ' . BASE_URL .
-                    '/Public/index.php?page=index'
+            $isValid = $validator->validate(
+                $_POST,
+                $loginRequest->rules()
             );
-            exit;
+
+            if (!$isValid) {
+
+                $errors = $validator->errors();
+            } else {
+
+                try {
+
+                    $user = $this->userService->authenticate(
+                        trim($_POST['username_or_email']),
+                        $_POST['password']
+                    );
+
+                    $_SESSION['user'] = $user->toArray();
+
+                    header(
+                        'Location: ' .
+                            BASE_URL .
+                            '/Public/index.php?page=index'
+                    );
+
+                    exit;
+                } catch (ValidationException $e) {
+                    $errors = $e->errors();
+                    $errorMessage = $e->getMessage();
+                } catch (NotFoundException $e) {
+
+                    $this->render404(
+                        $e->getMessage()
+                    );
+                } catch (DatabaseException $e) {
+
+                    $this->render500(
+                        'Registration failed because of a database error.'
+                    );
+                } catch (\Throwable $e) {
+
+                    $errorMessage =
+                        'Unexpected error occurred.';
+                }
+            }
         }
 
         require BASE_PATH . '/view/login.php';
     }
+    public function register(
+        RegisterUserRequest $request,
+        Validator $validator
+    ): void {
 
-    public function register(RegisterUserRequest $request, Validator $validator): void
-    {
         $pageTitle = 'Register';
         $section = 'register';
         $hideSearch = true;
@@ -66,8 +100,12 @@ class AuthController
         $errors = [];
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $username = trim($_POST['username'] ?? '');
-            $email = trim($_POST['email'] ?? '');
+
+            $username =
+                trim($_POST['username'] ?? '');
+
+            $email =
+                trim($_POST['email'] ?? '');
 
             $isValid = $validator->validate(
                 $_POST,
@@ -75,33 +113,51 @@ class AuthController
             );
 
             if (!$isValid) {
+
                 $errors = $validator->errors();
             } else {
+
                 try {
-                    $response = $this->userService->register([
-                        'username' => $username,
-                        'email' => $email,
-                        'password' => $_POST['password'] ?? '',
-                        'confirm_password' => $_POST['confirm_password'] ?? ''
-                    ]);
 
-                    if ($response->success) {
-                        $successMessage = $response->message;
+                    $response =
+                        $this->userService->register([
+                            'username' => $username,
+                            'email' => $email,
+                            'password' =>
+                            $_POST['password'] ?? '',
+                            'confirm_password' =>
+                            $_POST['confirm_password'] ?? ''
+                        ]);
 
-                        $username = '';
-                        $email = '';
-                    } else {
-                        $errors = $response->data ?? [];
-                    }
-                } catch (ValidationException $exception) {
-                    $errors = $exception->errors();
+                    $successMessage =
+                        $response->message;
+
+                    $username = '';
+                    $email = '';
+                } catch (ValidationException $e) {
+
+                    $errors = $e->errors();
+                } catch (NotFoundException $e) {
+
+                    $this->render404(
+                        $e->getMessage()
+                    );
+                } catch (DatabaseException $e) {
+
+                    $this->render500(
+                        'Registration failed because of a database error.'
+                    );
+                } catch (\Throwable $e) {
+
+                    $this->render500(
+                        'Unexpected error occurred.'
+                    );
                 }
             }
         }
 
         require BASE_PATH . '/view/register.php';
     }
-
     public function logout(): void
     {
         session_unset();

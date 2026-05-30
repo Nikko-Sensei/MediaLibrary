@@ -20,25 +20,49 @@ class UserService
         $this->repo = $repo;
     }
 
+
     public function authenticate(
         string $usernameOrEmail,
         string $password
-    ): ?UserDTO {
-        $user = $this->findUserByUsernameOrEmail($usernameOrEmail);
+    ): UserDTO {
 
-        if ($user === null) {
-            throw new NotFoundException('User not found.');
-        }
+        $errors = [];
 
-        /**
-         * VERIFY PASSWORD
-         */
+        // if (empty(trim($usernameOrEmail))) {
+        //     $errors['username_or_email'] =
+        //         'Username or Email is required.';
+        // }
 
-        if (!password_verify(
-            $password,
-            $user->getPassword()
-        )) {
-            return null;
+        // if (empty(trim($password))) {
+        //     $errors['password'] =
+        //         'Password is required.';
+        // }
+
+        // if (!empty($errors)) {
+        //     throw new ValidationException(
+        //         'Validation failed.',
+        //         $errors
+        //     );
+        // }
+
+        $user = $this->findUserByUsernameOrEmail(
+            $usernameOrEmail
+        );
+
+        $invalidCredentials = !$user ||
+            !password_verify(
+                $password,
+                $user->getPassword()
+            );
+
+        if ($invalidCredentials) {
+            throw new ValidationException(
+                'error_message',
+                [
+                    'error_message' =>
+                    'Invalid username/email or password.'
+                ]
+            );
         }
 
         return UserMapper::toDTO($user);
@@ -50,10 +74,20 @@ class UserService
         $email = trim($data['email'] ?? '');
         $password = $data['password'] ?? '';
 
-        $this->validateUniqueUser(
-            $username,
-            $email
-        );
+        $errors = [];
+
+        if ($this->repo->findByUsername($username) !== null) {
+
+            $errors['username'] = 'Username is already taken.';
+        }
+
+        if ($this->repo->findByEmail($email) !== null) {
+            $errors['email'] = 'Email is already registered.';
+        }
+
+        if (!empty($errors)) {
+            throw new ValidationException('Validation failed.', $errors);
+        }
 
         /**
          * CREATE USER
@@ -102,24 +136,6 @@ class UserService
             : null;
     }
 
-    private function validateUniqueUser(
-        string $username,
-        string $email
-    ): void {
-        $errors = [];
-
-        if ($this->repo->findByUsername($username) !== null) {
-            $errors['username'] = 'Username is already taken.';
-        }
-
-        if ($this->repo->findByEmail($email) !== null) {
-            $errors['email'] = 'Email is already registered.';
-        }
-
-        // if (!empty($errors)) {
-        //     throw new ValidationException('Validation failed.', $errors);
-        // }
-    }
 
     private function findUserByUsernameOrEmail(
         string $usernameOrEmail

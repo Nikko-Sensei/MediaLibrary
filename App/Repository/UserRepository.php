@@ -5,6 +5,9 @@ namespace App\Repository;
 use App\Contract\UserInterface;
 use App\Model\User;
 use PDO;
+use PDOException;
+use App\Exception\DatabaseException;
+
 
 class UserRepository extends BaseRepository implements UserInterface
 {
@@ -40,8 +43,10 @@ class UserRepository extends BaseRepository implements UserInterface
             : null;
     }
 
-    public function findByEmail(string $email): ?User
-    {
+public function findByEmail(string $email): ?User
+{
+    try {
+
         $stmt = $this->db->prepare(
             'SELECT * FROM users WHERE email = :email LIMIT 1'
         );
@@ -55,5 +60,14 @@ class UserRepository extends BaseRepository implements UserInterface
         return $row
             ? $this->mapToModel($row)
             : null;
+
+    } catch (PDOException $e) {
+
+        throw new DatabaseException(
+            'Unable to retrieve user by email.',
+            0,
+            $e
+        );
     }
+}
 }

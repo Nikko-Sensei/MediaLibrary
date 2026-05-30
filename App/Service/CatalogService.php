@@ -6,6 +6,7 @@ use App\Contract\CatalogInterface;
 use App\DB\Database;
 use App\Model\Catalog;
 use App\Repository\CatalogRepository;
+use App\Exception\NotFoundException;
 
 class CatalogService
 {
@@ -76,18 +77,25 @@ class CatalogService
      * FILTER: CATEGORY
      * =========================================================
      */
+
+
     private function getCategory(array $queryParams): ?string
     {
         $category = $queryParams['cat'] ?? null;
 
-        if (
-            $category !== null &&
-            in_array($category, self::ALLOWED_CATEGORIES, true)
-        ) {
-            return strtolower($category);
+        if ($category === null) {
+            return null;
         }
 
-        return null;
+        $category = strtolower(trim($category));
+
+        if (!in_array($category, self::ALLOWED_CATEGORIES, true)) {
+            throw new NotFoundException(
+                "Category '{$category}' not found."
+            );
+        }
+
+        return $category;
     }
 
     /*
@@ -265,5 +273,4 @@ class CatalogService
 
         return $item instanceof Catalog ? $item->toArray() : $item;
     }
-
 }

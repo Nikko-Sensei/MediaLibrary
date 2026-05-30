@@ -32,7 +32,7 @@ if (!defined('BASE_URL')) {
 
 require_once BASE_PATH . '/vendor/autoload.php';
 
-GlobalExceptionHandler::register();
+// GlobalExceptionHandler::register();
 
 use Dotenv\Dotenv;
 
@@ -65,10 +65,25 @@ $userService = new UserService($userRepo);
  * Exception flow:
  * any layer throws -> GlobalExceptionHandler -> logs/error.log -> friendly response
  */
-$page = $_GET['page'] ?? 'home';
+try {
 
-if (strpos($page, 'api/') === 0) {
-    require_once BASE_PATH . '/routes/api.php';
-} else {
-    require_once BASE_PATH . '/routes/web.php';
+    $page = $_GET['page'] ?? 'home';
+
+    if (strpos($page, 'api/') === 0) {
+        require BASE_PATH . '/routes/api.php';
+    } else {
+        require BASE_PATH . '/routes/web.php';
+    }
+
+} catch (\App\Exception\NotFoundException $e) {
+
+    http_response_code(404);
+
+    require BASE_PATH . '/view/errors/404.php';
+
+} catch (\Throwable $e) {
+
+    http_response_code(500);
+
+    require BASE_PATH . '/view/errors/500.php';
 }

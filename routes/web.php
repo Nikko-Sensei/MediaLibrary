@@ -17,11 +17,13 @@ use App\Service\FormatService;
 use App\Service\UserService;
 use App\Validate\Validator;
 use App\Request\RegisterUserRequest;
+use App\Exception\NotFoundException;
 
 
 
 
 $page = $_GET['page'] ?? 'home';
+
 
 switch ($page) {
     case 'details':
@@ -57,7 +59,14 @@ switch ($page) {
         $controller->logout();
         break;
 
-    default:  // HOME PAGE
+    case 'home':
         $controller = new CatalogController($catalogService);
         $controller->home();
+        break;
+
+
+    default:
+        throw new NotFoundException(
+            "Page '{$page}' not found."
+        );
 }
